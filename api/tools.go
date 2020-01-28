@@ -1,15 +1,25 @@
 package api
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"fmt"
+	// "reflect"
 )
 
 var upGrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool {
 		return true
 	},
+}
+
+
+type data struct {
+	Keyword string `json:"keyword"`
+	Select1 string `json:"select1"`
+	Switch1 bool `json:"switch1"`
 }
 
 func MessCmd(c *gin.Context) {
@@ -29,7 +39,14 @@ func MessCmd(c *gin.Context) {
 			message = []byte("pong")
 		}
 		//写入ws数据
-		err = ws.WriteMessage(mt, message)
+		msg := &data{}
+		err = json.Unmarshal(message, msg)
+		if err != nil {
+			fmt.Println("接收消息失败 ", err)
+			continue
+		}
+		fmt.Println(msg)
+		err = ws.WriteMessage(mt,[]byte("hello"))
 		if err != nil {
 			break
 		}
