@@ -6,7 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"fmt"
-	// "reflect"
+	"gosec/util"
 )
 
 var upGrader = websocket.Upgrader{
@@ -15,6 +15,13 @@ var upGrader = websocket.Upgrader{
 	},
 }
 
+var pytools = map[string]string{
+	"dirsearch": "/extra/dirsearch/dirsearch.py",
+}
+
+const (
+	pyexe string = "d:/Python36/python.exe"
+)
 
 type data struct {
 	Keyword string `json:"keyword"`
@@ -41,12 +48,17 @@ func MessCmd(c *gin.Context) {
 		//写入ws数据
 		msg := &data{}
 		err = json.Unmarshal(message, msg)
+		ppath := util.GetCurrentPath()
+		fmt.Println(msg.Keyword)
+		dircmd := []string{ppath + pytools["dirsearch"],"-u",msg.Keyword,"-e *"}
+		out := util.CmdExe(pyexe,dircmd)
 		if err != nil {
 			fmt.Println("接收消息失败 ", err)
 			continue
 		}
-		fmt.Println(msg)
-		err = ws.WriteMessage(mt,[]byte("hello"))
+
+		err = ws.WriteMessage(mt,[]byte(out))
+		
 		if err != nil {
 			break
 		}

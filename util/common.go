@@ -3,6 +3,9 @@ package util
 import (
 	"math/rand"
 	"time"
+	"os"
+	"strings"
+	"path/filepath"
 )
 
 // RandStringRunes 返回随机字符串
@@ -15,4 +18,13 @@ func RandStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
+}
+
+func GetCurrentPath() string {
+    s, err := os.Getwd()
+    if err != nil {
+		panic(err)
+	}
+	path := strings.Replace(s, string(filepath.Separator), "/", -1)
+    return path
 }
