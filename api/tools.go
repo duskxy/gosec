@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"net/http"
 	"fmt"
+	"bufio"
 	"gosec/util"
 )
 
@@ -18,6 +19,8 @@ var upGrader = websocket.Upgrader{
 var pytools = map[string]string{
 	"dirsearch": "/extra/dirsearch/dirsearch.py",
 }
+
+var ebuf *bufio.Scanner
 
 const (
 	pyexe string = "d:/Python36/python.exe"
@@ -51,13 +54,18 @@ func MessCmd(c *gin.Context) {
 		ppath := util.GetCurrentPath()
 		fmt.Println(msg.Keyword)
 		dircmd := []string{ppath + pytools["dirsearch"],"-u",msg.Keyword,"-e *"}
-		out := util.CmdExe(pyexe,dircmd)
+		ebuf = util.CmdExe(pyexe,dircmd)
 		if err != nil {
 			fmt.Println("接收消息失败 ", err)
 			continue
 		}
 
-		err = ws.WriteMessage(mt,[]byte(out))
+		for ebuf.Scan() {
+			// fmt.Println(ebuf.Text())
+			err = ws.WriteMessage(mt,[]byte(ebuf.Text() + "\r\n"))
+		}
+
+		// err = ws.WriteMessage(mt,[]byte("hello"))
 		
 		if err != nil {
 			break

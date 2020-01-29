@@ -17,7 +17,7 @@ import (
 // 	return string(out)
 // }
 
-func CmdExe(cmd string,dstcmd []string,mt interface{},ws interface{}) {
+func CmdExe(cmd string,dstcmd []string) *bufio.Scanner {
 	c := exec.Command(cmd, dstcmd...)
 	// out, err := c.CombinedOutput()
 	stdout, err := c.StdoutPipe()
@@ -26,9 +26,10 @@ func CmdExe(cmd string,dstcmd []string,mt interface{},ws interface{}) {
 	}
 	c.Start()
 	scanner := bufio.NewScanner(stdout)
-    for scanner.Scan() {
-        ws.WriteMessage(mt,[]byte(scanner.Text()))
-    }
+	return scanner
+    // for scanner.Scan() {
+    //     fmt.Println(scanner.Text())
+    // }
 	// return string(out)
 }
 
