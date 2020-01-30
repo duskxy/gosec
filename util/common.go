@@ -20,6 +20,7 @@ func RandStringRunes(n int) string {
 	return string(b)
 }
 
+// GetCurrentPath 返回项目路径
 func GetCurrentPath() string {
     s, err := os.Getwd()
     if err != nil {

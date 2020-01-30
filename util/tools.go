@@ -1,35 +1,22 @@
 package util
 
 import (
-	"os/exec"
-	"fmt"
 	"bufio"
+	"fmt"
+	"os/exec"
 )
 
-// func CmdExe(cmd string,exepath string,domain string) string {
-// 	dstcmd := []string{exepath,"-u",domain,"-e *"}
-// 	c := exec.Command(cmd, dstcmd...)
-// 	out, err := c.CombinedOutput()
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	// fmt.Println(string(out))
-// 	return string(out)
-// }
+// CmdExe 命令执行
+func CmdExe(cmd string, dstcmd []string) (*exec.Cmd, *bufio.Scanner, error) {
 
-func CmdExe(cmd string,dstcmd []string) *bufio.Scanner {
 	c := exec.Command(cmd, dstcmd...)
 	// out, err := c.CombinedOutput()
 	stdout, err := c.StdoutPipe()
 	if err != nil {
 		fmt.Println(err)
+		return nil, nil, err
 	}
 	c.Start()
 	scanner := bufio.NewScanner(stdout)
-	return scanner
-    // for scanner.Scan() {
-    //     fmt.Println(scanner.Text())
-    // }
-	// return string(out)
+	return c, scanner, nil
 }
-

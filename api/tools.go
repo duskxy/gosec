@@ -1,13 +1,15 @@
 package api
 
 import (
+	"bufio"
 	"encoding/json"
+	"fmt"
+	"gosec/util"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
-	"net/http"
-	"fmt"
-	"bufio"
-	"gosec/util"
 )
 
 var upGrader = websocket.Upgrader{
@@ -29,7 +31,7 @@ const (
 type data struct {
 	Keyword string `json:"keyword"`
 	Select1 string `json:"select1"`
-	Switch1 bool `json:"switch1"`
+	Switch1 bool   `json:"switch1"`
 }
 
 func MessCmd(c *gin.Context) {
@@ -51,22 +53,30 @@ func MessCmd(c *gin.Context) {
 		//写入ws数据
 		msg := &data{}
 		err = json.Unmarshal(message, msg)
-		ppath := util.GetCurrentPath()
-		fmt.Println(msg.Keyword)
-		dircmd := []string{ppath + pytools["dirsearch"],"-u",msg.Keyword,"-e *"}
-		ebuf = util.CmdExe(pyexe,dircmd)
 		if err != nil {
 			fmt.Println("接收消息失败 ", err)
 			continue
 		}
-
-		for ebuf.Scan() {
-			// fmt.Println(ebuf.Text())
-			err = ws.WriteMessage(mt,[]byte(ebuf.Text() + "\r\n"))
+		ppath := util.GetCurrentPath()
+		fmt.Println(msg.Keyword)
+		dircmd := []string{ppath + pytools["dirsearch"], "-u", msg.Keyword, "-e *"}
+		c, ebuf, err := util.CmdExe(pyexe, dircmd)
+		if err != nil {
+			fmt.Println("命令执行失败 ", err)
+			continue
 		}
 
-		// err = ws.WriteMessage(mt,[]byte("hello"))
-		
+		for ebuf.Scan() {
+
+			if !strings.Contains(ebuf.Text(), "Last request to") {
+				if !strings.Contains(ebuf.Text(), "Error Log") {
+					fmt.Println(ebuf.Text())
+					err = ws.WriteMessage(mt, []byte(ebuf.Text()+"\r\n"))
+				}
+			}
+		}
+		c.Wait()
+
 		if err != nil {
 			break
 		}
