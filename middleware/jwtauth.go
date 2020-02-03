@@ -44,8 +44,12 @@ func GinJWTMiddlewareInit() (authMiddleware *jwt.GinJWTMiddleware) {
 			//handles the login logic. On success LoginResponse is called, on failure Unauthorized is called
 			var loginVals service.UserLoginService
 			if err := c.ShouldBind(&loginVals); err == nil {
-				res := loginVals.Login(c)
-				return res, nil
+				if res, ok := loginVals.Login(c); ok {
+					return res,nil
+				} else {
+					return res,jwt.ErrFailedAuthentication
+				}
+				
 			} else {
 				return "", jwt.ErrMissingLoginValues
 			}
