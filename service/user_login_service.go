@@ -35,7 +35,7 @@ func (service *UserLoginService) Login(c *gin.Context) serializer.Response {
 	}
 
 	// 设置session
-	service.setSession(c, user)
+	// service.setSession(c, user)
 
 	return serializer.BuildUserResponse(user)
 }

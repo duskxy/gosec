@@ -1,9 +1,10 @@
 package server
 
 import (
-	"os"
 	"gosec/api"
 	"gosec/middleware"
+
+	// "os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -13,28 +14,29 @@ func NewRouter() *gin.Engine {
 	r := gin.Default()
 
 	// 中间件, 顺序不能改
-	r.Use(middleware.Session(os.Getenv("SESSION_SECRET")))
+	// r.Use(middleware.Session(os.Getenv("SESSION_SECRET")))
 	r.Use(middleware.Cors())
-	r.Use(middleware.CurrentUser())
-
+	// r.Use(middleware.CurrentUser())
+	authMiddleware := middleware.GinJWTMiddlewareInit()
 	// 路由
 	v1 := r.Group("/api/v1")
 	{
-		v1.GET("ping", api.Ping)
+		// v1.GET("ping", api.Ping)
 
-		v1.GET("afuzz",api.MessCmd)
- 
+		v1.GET("afuzz", api.MessCmd)
+
 		// 用户登录
 		v1.POST("user/register", api.UserRegister)
 
 		// 用户登录
-		v1.POST("user/login", api.UserLogin)
+		v1.POST("user/login", authMiddleware.LoginHandler)
 
 		// 需要登录保护的
 		auth := v1.Group("")
-		auth.Use(middleware.AuthRequired())
+		auth.Use(authMiddleware.MiddlewareFunc())
 		{
 			// User Routing
+			auth.GET("ping", api.Ping)
 			auth.GET("user/me", api.UserMe)
 			auth.DELETE("user/logout", api.UserLogout)
 		}

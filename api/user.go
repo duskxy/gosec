@@ -32,9 +32,10 @@ func UserLogin(c *gin.Context) {
 
 // UserMe 用户详情
 func UserMe(c *gin.Context) {
-	user := CurrentUser(c)
-	res := serializer.BuildUserResponse(*user)
-	c.JSON(200, res)
+	// user := CurrentUser(c)
+	// res := serializer.BuildUserResponse(*user)
+	// c.JSON(200, res)
+	c.JSON(200, gin.H{"hello": "vue"})
 }
 
 // UserLogout 用户登出
