@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"gosec/util"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -20,12 +21,16 @@ var upGrader = websocket.Upgrader{
 
 var pytools = map[string]string{
 	"dirsearch": "/extra/dirsearch/dirsearch.py",
+	"Sublist3r": "/extra/Sublist3r/sublist3r.py",
 }
 
-var ebuf *bufio.Scanner
+var (
+	ebuf   *bufio.Scanner
+	dircmd []string
+)
 
 const (
-	pyexe string = "d:/Python36/python.exe"
+	pyexe string = os.Getenv("PYEXE")
 )
 
 type data struct {
@@ -59,7 +64,12 @@ func MessCmd(c *gin.Context) {
 		}
 		ppath := util.GetCurrentPath()
 		fmt.Println(msg.Keyword)
-		dircmd := []string{ppath + pytools["dirsearch"], "-u", msg.Keyword, "-e *"}
+		if msg.Select1 == "dirsearch" {
+			dircmd = []string{ppath + pytools[msg.Select1], "-u", msg.Keyword, "-e *"}
+		} else if msg.Select1 == "Sublist3r" {
+			dircmd = []string{ppath + pytools[msg.Select1], "-d", msg.Keyword}
+		}
+		fmt.Println(dircmd)
 		c, ebuf, err := util.CmdExe(pyexe, dircmd)
 		if err != nil {
 			fmt.Println("命令执行失败 ", err)
@@ -67,18 +77,17 @@ func MessCmd(c *gin.Context) {
 		}
 
 		for ebuf.Scan() {
-
 			if !strings.Contains(ebuf.Text(), "Last request to") {
 				if !strings.Contains(ebuf.Text(), "Error Log") {
 					fmt.Println(ebuf.Text())
 					err = ws.WriteMessage(mt, []byte(ebuf.Text()+"\r\n"))
+					if err != nil {
+						break
+					}
 				}
 			}
 		}
 		c.Wait()
 
-		if err != nil {
-			break
-		}
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"time"
     "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
+	"gosec/serializer"
 )
 
 func GinJWTMiddlewareInit() (authMiddleware *jwt.GinJWTMiddleware) {
@@ -47,22 +48,24 @@ func GinJWTMiddlewareInit() (authMiddleware *jwt.GinJWTMiddleware) {
 				if res, ok := loginVals.Login(c); ok {
 					return res,nil
 				} else {
-					return res,jwt.ErrFailedAuthentication
+					return nil,jwt.ErrFailedAuthentication
 				}
 				
 			} else {
 				return "", jwt.ErrMissingLoginValues
 			}
-
-			return nil, jwt.ErrFailedAuthentication
 		},
 		//receives identity and handles authorization logic
 		// Authorizator: jwtAuthorizator,
 		//handles unauthorized logic
 		Unauthorized: func(c *gin.Context, code int, message string) {
-			c.JSON(code, gin.H{
-				"code":    code,
-				"message": message,
+			// c.JSON(code, gin.H{
+			// 	"code":    code,
+			// 	"message": message,
+			// })
+			c.JSON(code, serializer.Response{
+				Code: code,
+				Msg:  message,
 			})
 		},
 		// TokenLookup is a string in the form of "<source>:<name>" that is used

@@ -14,15 +14,13 @@ func NewRouter() *gin.Engine {
 	r := gin.Default()
 
 	// 中间件, 顺序不能改
-	// r.Use(middleware.Session(os.Getenv("SESSION_SECRET")))
 	r.Use(middleware.Cors())
-	// r.Use(middleware.CurrentUser())
 	authMiddleware := middleware.GinJWTMiddlewareInit()
 	// 路由
 	v1 := r.Group("/api/v1")
 	{
 		// v1.GET("ping", api.Ping)
-
+		v1.GET("ping", api.Ping)
 		v1.GET("afuzz", api.MessCmd)
 
 		// 用户登录
@@ -36,7 +34,7 @@ func NewRouter() *gin.Engine {
 		auth.Use(authMiddleware.MiddlewareFunc())
 		{
 			// User Routing
-			auth.GET("ping", api.Ping)
+
 			auth.GET("user/me", api.UserMe)
 			auth.DELETE("user/logout", api.UserLogout)
 		}
