@@ -10,11 +10,14 @@ import (
 func CmdExe(cmd string, dstcmd []string) (*exec.Cmd, *bufio.Scanner, error) {
 
 	c := exec.Command(cmd, dstcmd...)
-	// out, err := c.CombinedOutput()
 	stdout, err := c.StdoutPipe()
 	if err != nil {
 		fmt.Println(err)
 		return nil, nil, err
+	}
+	_, oerr := c.StderrPipe()
+	if oerr != nil {
+		fmt.Println(oerr)
 	}
 	c.Start()
 	scanner := bufio.NewScanner(stdout)

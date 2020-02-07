@@ -29,10 +29,6 @@ var (
 	dircmd []string
 )
 
-const (
-	pyexe string = os.Getenv("PYEXE")
-)
-
 type data struct {
 	Keyword string `json:"keyword"`
 	Select1 string `json:"select1"`
@@ -69,8 +65,7 @@ func MessCmd(c *gin.Context) {
 		} else if msg.Select1 == "Sublist3r" {
 			dircmd = []string{ppath + pytools[msg.Select1], "-d", msg.Keyword}
 		}
-		fmt.Println(dircmd)
-		c, ebuf, err := util.CmdExe(pyexe, dircmd)
+		c, ebuf, err := util.CmdExe(os.Getenv("PYEXE"), dircmd)
 		if err != nil {
 			fmt.Println("命令执行失败 ", err)
 			continue
