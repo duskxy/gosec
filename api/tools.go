@@ -63,7 +63,7 @@ func MessCmd(c *gin.Context) {
 		if msg.Select1 == "dirsearch" {
 			dircmd = []string{ppath + pytools[msg.Select1], "-u", msg.Keyword, "-e *"}
 		} else if msg.Select1 == "Sublist3r" {
-			dircmd = []string{ppath + pytools[msg.Select1], "-d", msg.Keyword}
+			dircmd = []string{ppath + pytools[msg.Select1], "-d", msg.Keyword,"-p 80,443"}
 		}
 		c, ebuf, err := util.CmdExe(os.Getenv("PYEXE"), dircmd)
 		if err != nil {
